@@ -9,3 +9,4 @@ url: 'https://www.oscvitap.org/'
 
 - Created foundation for the OSC platform Infrastructure
 - Flutter - Riverpod (for managing states) - Google Maps Integration
+- Hosted Seminars and workshops
