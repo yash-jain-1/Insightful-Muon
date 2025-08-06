@@ -1,5 +1,5 @@
 ---
-date: '10-01-2023'
+date: '10-07-2025'
 title: 'Rubiks Cube Solver'
 github: 'https://github.com/yash-jain-1/rubiks_cube_solver'
 external: ''
