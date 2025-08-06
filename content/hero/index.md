@@ -1,9 +1,9 @@
 ---
-title: 'Hoi! my name is'
+title: 'Yo! my name is'
 name: 'Yash Jain'
 subtitle: 'Try Something New...'
-buttonText: 'Get In Touch'
+buttonText: 'Deploy a DM'
 ---
 
-I'm a Pre-Final Year Computer Science Engineering Student at Vellore Intitute of Technology. Trying to do some amazing stuff.
-I enjoy learning new skills and implementing them in real life!
+I'm a Final Year Computer Science Engineering Student at Vellore Intitute of Technology. Trying to do some amazing stuff.
+
