@@ -26,11 +26,11 @@ Text fields accept `**bold**`, `` `code` `` and `[links](https://…)`.
 
 ```sh
 npm install
-npm start        # builds and previews on http://localhost:8000
+npm start        # builds and previews on http://localhost:8000/Insightful-Muon/
 npm run build    # just builds into public/
 ```
 
-The build checks `site.yml` and stops with a list of problems (missing titles,
+The build also writes a `404.html` (with the cat) and checks `site.yml` and stops with a list of problems (missing titles,
 missing images, unknown section names). Pushing to `main` builds and deploys
 via GitHub Actions; pull requests run the same build as a check.
 

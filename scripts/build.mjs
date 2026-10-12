@@ -244,7 +244,11 @@ const html = `<!doctype html>
 <meta property="og:title" content="${esc(site.title)}">
 <meta property="og:description" content="${esc(site.description || '')}">
 ${site.url ? `<meta property="og:url" content="${esc(site.url)}"><link rel="canonical" href="${esc(site.url)}">` : ''}
-<link rel="icon" href="assets/favicon.ico">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="${esc(accent)}">
+${site.url ? `<meta property="og:image" content="${esc(new URL('assets/og.png', site.url).href)}"><meta name="twitter:card" content="summary_large_image">` : ''}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Silkscreen&display=swap" rel="stylesheet">
@@ -307,4 +311,25 @@ cpSync(join(root, 'assets'), join(out, 'assets'), { recursive: true });
 if (existsSync(join(root, 'static'))) cpSync(join(root, 'static'), out, { recursive: true });
 writeFileSync(join(out, 'index.html'), html);
 writeFileSync(join(out, '.nojekyll'), '');
+
+// 404: same head and cat, with a <base> so assets resolve from any missing path.
+const base = site.url ? new URL(site.url).pathname : '/';
+const notFound = html
+  .replace('<head>', `<head>\n<base href="${esc(base)}">`)
+  .replace(/<title>[^<]*<\/title>/, `<title>404 · ${esc(site.name)}</title>`)
+  .replace(
+    /<main id="main">[\s\S]*<\/main>/,
+    `<main id="main"><section class="hero lost">
+  <div class="halftone" aria-hidden="true"></div>
+  <div class="hero-copy">
+    <p class="micro">[ error 404 ]</p>
+    <h1 class="name">404</h1>
+    <p class="headline">This page burned down.<span>The cat checked. Nothing here.</span></p>
+    <div class="hero-cta"><a class="btn light" href="./">Back home</a></div>
+  </div>
+  ${fireOn ? `<canvas class="fire" aria-hidden="true" data-pixel="${Number(fire.pixel) || 6}" data-wind="${esc(fire.wind || 'none')}" style="height:${Number(fire.height) || 180}px"></canvas>` : ''}
+</section></main>`,
+  )
+  .replace(/href="#([a-z]+)"/g, 'href="./#$1"');
+writeFileSync(join(out, '404.html'), notFound);
 console.log(`Built ${sections.length} sections → ${out}/index.html`);

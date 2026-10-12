@@ -116,19 +116,42 @@
   }
 
   // ── Pixelated images ───────────────────────────────────────
-  // Each .pixelate image gets a low-res canvas laid over it; hovering
-  // or focusing the card reveals the real image underneath.
-  const pixelate = (imgEl) => {
-    const blocks = 48;
+  // Each .pixelate image starts as a chunky low-res canvas and sharpens in
+  // a few steps when it scrolls into view (the "/pixel effect" pins).
+  const drawAt = (c, imgEl, blocks) => {
     const ratio = imgEl.naturalHeight / imgEl.naturalWidth || 1;
-    const c = document.createElement('canvas');
     c.width = blocks;
     c.height = Math.max(1, Math.round(blocks * ratio));
+    c.getContext('2d').drawImage(imgEl, 0, 0, c.width, c.height);
+  };
+  const sharpen = (c, imgEl) => {
+    if (reduceMotion.matches) return c.remove();
+    const steps = [16, 32, 64, 128];
+    steps.forEach((b, i) => setTimeout(() => drawAt(c, imgEl, b), 140 * (i + 1)));
+    setTimeout(() => c.remove(), 140 * (steps.length + 1));
+  };
+  const sharpenIO =
+    'IntersectionObserver' in window
+      ? new IntersectionObserver(
+          (entries) =>
+            entries.forEach((e) => {
+              if (!e.isIntersecting) return;
+              sharpenIO.unobserve(e.target);
+              sharpen(e.target._cover, e.target);
+            }),
+          { threshold: 0.5 },
+        )
+      : null;
+  const pixelate = (imgEl) => {
+    const c = document.createElement('canvas');
     c.className = 'pixel-cover';
     c.setAttribute('aria-hidden', 'true');
-    c.getContext('2d').drawImage(imgEl, 0, 0, c.width, c.height);
+    drawAt(c, imgEl, 8);
     imgEl.parentElement.classList.add('has-pixels');
     imgEl.after(c);
+    imgEl._cover = c;
+    if (sharpenIO) sharpenIO.observe(imgEl);
+    else c.remove();
   };
   document.querySelectorAll('img.pixelate').forEach((el) => {
     if (el.complete && el.naturalWidth) pixelate(el);

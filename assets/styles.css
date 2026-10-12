@@ -446,12 +446,6 @@ main p a:hover,
   position: absolute;
   inset: 0;
   image-rendering: pixelated;
-  transition: opacity 320ms steps(5);
-}
-.photo:hover .pixel-cover,
-.feature:hover .pixel-cover,
-.feature:focus-within .pixel-cover {
-  opacity: 0;
 }
 
 /* experience */
@@ -852,4 +846,9 @@ canvas.dissolve {
   *::after {
     transition: none !important;
   }
+}
+
+/* 404 page */
+.hero.lost {
+  margin-bottom: 140px;
 }
