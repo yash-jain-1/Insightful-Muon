@@ -1,74 +1,44 @@
-<div align="center">
-  <img alt="Logo" src="https://github.com/yash-jain-1/yash-jain-1.github.io/blob/source/src/images/logo.png" width="100" />
-</div>
-<h1 align="center">
-  Portfolio Website Version 1
-</h1>
-<p align="center">
-  The first iteration of <a href="https://yash-jain-1.github.io/" target="_blank">Yash Jain's</a> portfolio built with <a href="https://www.gatsbyjs.org/" target="_blank">Gatsby</a> and hosted with <a href="https://pages.github.com/" target="_blank">Github Pages</a>
-</p>
-<!-- <p align="center">
-  Previous iterations:
-  <a href="https://github.com/chandrikadeb7/chandrikadeb7.github.io-v1" target="_blank">Version 1</a>
-</p> -->
+# Insightful-Muon
 
-<div align="center">
-  <img alt="Demo" src="https://github.com/yash-jain-1/yash-jain-1.github.io/blob/source/src/images/demo.png" />
-</div>
+Yash Jain's portfolio: a minimal pixel-art site with a DOOM-style fire, live at
+<https://yash-jain-1.github.io/Insightful-Muon/>.
 
-### TL;DR
+## Editing content
 
-Yes, you can fork this repo. Please give proper credit by linking back to [brittanychiang.com](https://brittanychiang.com). Thanks!
+Everything on the page comes from **[`content/site.yml`](content/site.yml)**.
 
-## 🛠 Installation & Set Up
+| To… | Do this |
+| --- | --- |
+| Add a job or project | Copy an existing block in `experience:` or `projects:` and edit it |
+| Remove something but keep it for later | Add `hidden: true` to it |
+| Reorder | Move the block up or down; page order = file order |
+| Make a project big, with an image | `featured: true` and `image: projects/<file>` (put the file in `assets/img/projects/`) |
+| Tuck an old project away | `archived: true` puts it in the "Older projects" drawer |
+| Hide or reorder whole sections | Edit the `sections:` list |
+| Add a résumé button | Put the PDF in `static/` and set `site.resume: resume.pdf` |
+| Change the accent colour or fire | Edit `theme:` |
 
-1. Install the Gatsby CLI
+Text fields accept `**bold**`, `` `code` `` and `[links](https://…)`.
 
-   ```sh
-   npm install -g gatsby-cli
-   ```
+## Building
 
-2. Install and use the correct version of Node using [NVM](https://github.com/nvm-sh/nvm)
+```sh
+npm install
+npm start        # builds and previews on http://localhost:8000
+npm run build    # just builds into public/
+```
 
-   ```sh
-   nvm install
-   ```
+The build checks `site.yml` and stops with a list of problems (missing titles,
+missing images, unknown section names). Pushing to `main` builds and deploys
+via GitHub Actions; pull requests run the same build as a check.
 
-3. Install dependencies
+## Files
 
-   ```sh
-   yarn
-   ```
+- `content/site.yml` content
+- `scripts/build.mjs` renders the YAML into `public/index.html`
+- `assets/styles.css`, `assets/main.js` look and behaviour (fire, pixelated images)
+- `assets/img/` images
+- `static/` copied as-is to the site root (résumé, etc.)
 
-4. Start the development server
-
-   ```sh
-   npm start
-   ```
-
-## 🚀 Building and Running for Production
-
-1. Generate a full static production build
-
-   ```sh
-   npm run build
-   ```
-
-1. Preview the site as it will appear once deployed
-
-   ```sh
-   npm run serve
-   ```
-
-## 🎨 Color Reference
-
-| Color          | Hex                                                                |
-| -------------- | ------------------------------------------------------------------ |
-| Navy           | ![#0a192f](https://via.placeholder.com/10/0a192f?text=+) `#0a192f` |
-| Light Navy     | ![#172a45](https://via.placeholder.com/10/0a192f?text=+) `#172a45` |
-| Lightest Navy  | ![#303C55](https://via.placeholder.com/10/303C55?text=+) `#303C55` |
-| Slate          | ![#8892b0](https://via.placeholder.com/10/8892b0?text=+) `#8892b0` |
-| Light Slate    | ![#a8b2d1](https://via.placeholder.com/10/a8b2d1?text=+) `#a8b2d1` |
-| Lightest Slate | ![#ccd6f6](https://via.placeholder.com/10/ccd6f6?text=+) `#ccd6f6` |
-| White          | ![#e6f1ff](https://via.placeholder.com/10/e6f1ff?text=+) `#e6f1ff` |
-| Green          | ![#64ffda](https://via.placeholder.com/10/64ffda?text=+) `#64ffda` |
+The fire is the PSX DOOM fire algorithm. It pauses when off-screen, and shows a
+still frame for visitors who prefer reduced motion. Click it to put it out.

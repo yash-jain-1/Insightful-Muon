@@ -1,0 +1,215 @@
+# ─────────────────────────────────────────────────────────────
+#  All of the site's content lives in this one file.
+#
+#  • Order on the page = order in this file. Move a block up or
+#    down to reorder it.
+#  • Add `hidden: true` to any experience, project, achievement,
+#    social link or section to take it off the site without
+#    deleting it.
+#  • Text fields accept a little Markdown: **bold**, `code` and
+#    [links](https://example.com).
+#  • Images go in assets/img/ and are referenced relative to it.
+#
+#  Run `npm run build` to check your edits; the build stops with
+#  a clear message if something is missing.
+# ─────────────────────────────────────────────────────────────
+
+site:
+  name: Yash Jain
+  title: Yash Jain · Software Engineer
+  description: Software engineer in Bengaluru working on MLOps, backend systems and the occasional maths rabbit hole.
+  url: https://yash-jain-1.github.io/Insightful-Muon/
+  email: yashjainstudy@gmail.com
+  location: Bengaluru, India
+  # Path or URL to your résumé. Leave empty to hide the button.
+  resume: ''
+
+theme:
+  accent: '#ff6a1a' # main highlight colour (links, tags, buttons)
+  fire:
+    enabled: true
+    # Height of the fire strip under the hero, in screen pixels.
+    height: 180
+    # Size of one fire "pixel" in screen pixels. Bigger = chunkier.
+    pixel: 6
+
+# Which sections appear, in which order. `nav: true` adds a link to the top bar.
+sections:
+  - { id: about, title: About, nav: true }
+  - { id: experience, title: Experience, nav: true }
+  - { id: projects, title: Projects, nav: true }
+  - { id: education, title: Education }
+  - { id: achievements, title: Achievements }
+  - { id: contact, title: Contact, nav: true }
+
+hero:
+  kicker: 'Hi, my name is'
+  headline: Associate Software Engineer.
+  tagline: MLOps, software and math stuff.
+  blurb: Graduate trainee at Fidelity Investments, building pipelines, infrastructure and the occasional database from scratch.
+
+about:
+  photo: me.jpg
+  text:
+    - I'm an engineer at [Fidelity Investments](https://www.fidelity.com/) in Bengaluru. I graduated in CSE (AI & ML) from [VIT-AP](https://www.vitap.ac.in/), and I like working where software meets infrastructure. That has meant reconciliation pipelines, CI/CD, Kubernetes and Terraform at work, and Flutter apps for 10,000+ users before that.
+    - Outside work I build things to understand them, like a Redis-style cache server in Rust or a Unix shell in C.
+  skills:
+    - Java / Spring Boot
+    - Rust
+    - Python & ML
+    - Flutter
+    - Kubernetes & Terraform
+    - CI/CD (Jenkins)
+    - REST & gRPC
+    - MongoDB
+
+experience:
+  - role: Executive Graduate Trainee
+    company: Fidelity Investments
+    url: https://www.fidelity.com/
+    location: Bengaluru
+    dates: Aug 2026 – Present
+    bullets: []
+
+  - role: Summer Intern → SDE Intern
+    company: Fidelity Investments
+    url: https://www.fidelity.com/
+    location: Bengaluru
+    dates: May – Jul 2025 · Jan – Jul 2026
+    bullets:
+      - Developed scalable reconciliation pipelines using Spring Boot, orchestrating workflows across legacy and modern distributed systems with robust logging and automated reporting.
+      - Migrated and optimized Jenkins CI/CD pipelines to streamline deployment workflows and improve build reliability.
+      - Resolved critical Kubernetes pod failures and automated infrastructure provisioning with Terraform, eliminating manual configuration overhead.
+      - Collaborated with a cross-functional Agile team to deliver core features for an enterprise financial platform.
+
+  - role: Flutter Developer
+    company: Mukham, Digital Fortress Pvt. Ltd.
+    url: https://digitalfortress.in/
+    dates: May 2023 – Jun 2024
+    bullets:
+      - Led development of 3 cross-platform Flutter apps reaching 10,000+ users.
+      - Integrated 20+ REST APIs, cutting data loading times by 35%.
+      - Secured user data with Firebase Authentication and Firestore Security Rules.
+      - Implemented gRPC for inter-service communication, reducing data transfer latency by 60% versus REST.
+
+  - role: Mobile App Developer
+    company: Open Source Community, VIT-AP
+    url: https://www.oscvitap.org/
+    dates: Sep 2023 – Jan 2025
+    bullets:
+      - Created the foundation for the OSC platform infrastructure.
+      - Built Flutter apps with Riverpod state management and Google Maps integration.
+      - Hosted seminars and workshops.
+
+  - role: Project Team Member
+    company: Machine Learning Club, VIT-AP
+    dates: Oct 2022 – Aug 2023
+    bullets:
+      - Developed a facial identification system using OpenCV.
+      - Engineered a hand-gesture controlled system for everyday devices using CNNs and OpenCV.
+
+# Projects
+#   featured: true  → big card with image at the top
+#   archived: true  → tucked into the "Older projects" drawer at the bottom
+#   (neither)       → regular small card
+projects:
+  - title: MuDB
+    featured: true
+    description: A Redis-inspired in-memory cache server in Rust that speaks the RESP protocol. Async networking on Tokio with a framed codec, key-value and list storage, and MULTI/EXEC/DISCARD transactions. Ships with `mudb-cli`, an interactive clap-based client. Dockerised, v0.2.
+    tech: [Rust, Tokio, RESP, clap, Docker]
+    github: https://github.com/yash-jain-1/muDB
+
+  - title: Panopticon
+    featured: true
+    status: Design stage
+    description: A zero-trust control plane that lets financial AI agents act only within the intent, constraints and risk limits a user approved. The agent proposes and the control plane decides; no order reaches a venue unless a deterministic gateway, holding keys the agent never sees, checks it against a confirmed mandate.
+    tech: [Java 21, Spring Boot, FastAPI, PostgreSQL, Docker Compose]
+
+  - title: Shanu Courier Services
+    featured: true
+    description: Shipment tracking and logistics platform for an Indore courier company. Customers follow parcels on a shipment timeline; admins manage shipments from a JWT-secured dashboard. React on Netlify, Express and MongoDB Atlas on Render.
+    tech: [React, Node.js, Express, MongoDB, JWT]
+    github: https://github.com/yash-jain-1/Courier-Tracking-Website
+    live: https://shanucourier.netlify.app
+
+  - title: Crypto Sentinels
+    featured: true
+    image: projects/crypto-sentinels.jpg
+    description: A toolkit for government agencies to monitor and deanonymize cryptocurrency wallets linked to illegal activity on the dark web, built for Smart India Hackathon 2023 (SIH1445). BERT-based analysis with asynchronous, real-time processing in a stand-alone deployment.
+    tech: [TypeScript, Electron, React, MongoDB, Python, AWS EC2]
+    github: https://github.com/yash-jain-1/Crypto-Sentinels
+    live: https://sentinel.redomic.in/
+
+  - title: BERT4Crypto
+    featured: true
+    image: projects/bert4crypto.png
+    description: A transformer model that identifies fraudulent cryptocurrency transactions and wallets using the Elliptic++ dataset.
+    tech: [TensorFlow, Transformers, scikit-learn, Pandas]
+    github: https://github.com/yash-jain-1/BERT4Crypto
+
+  - title: Food Ape
+    featured: true
+    image: projects/food-ape.png
+    description: A real-time cross-platform app for ordering food and checking the college hostel mess menu, with secure transactions and a fault-tolerant backend.
+    tech: [Flutter, Express, MongoDB, TensorFlow.js]
+    github: https://github.com/anantgupta001/FoodApe
+
+  - title: Dark Sentiments
+    image: projects/dark-sentiments.png
+    description: A scalable, interactive, real-time application for collaborative DSA code sprints with friends, featuring a timer, asynchronous communication, and automated habit tracking.
+    tech: [TypeScript, Express, Material Design]
+
+  - title: CodeSpecView
+    description: Multi-utility app for 1-on-1 code sprints, with a shared timer, asynchronous chat and automated habit tracking.
+    tech: [TypeScript, Express, Material Design]
+    github: https://github.com/yash-jain-1/Codespecview
+
+  - title: muonShell
+    archived: true
+    description: Minimal Unix shell in C with an ncurses interface, a tokenizing parser, built-ins and fork/exec of external programs.
+    tech: [C, ncurses]
+    github: https://github.com/yash-jain-1/Mu-Shell
+
+  - title: Govt Scheme Mapper
+    archived: true
+    description: Scrapes and extracts government data to generate insights for targeting welfare schemes using AI.
+    tech: [Python, PyTorch, Express, GeoJSON]
+    github: https://github.com/yash-jain-1/SchemeMapper
+
+  - title: Rubik's Cube Solver
+    archived: true
+    description: Models and solves a Rubik's Cube with real move logic and several solving strategies, with a CLI and a 3D visualizer.
+    tech: [Python, TypeScript, Three.js]
+    github: https://github.com/yash-jain-1/rubiks_cube_solver
+
+  - title: WebPage Element Detect
+    archived: true
+    description: A YOLO-based computer vision model fine-tuned to recognise elements on a webpage. [Live demo on Hugging Face](https://huggingface.co/spaces/the-insightful-muon/web_element_detection).
+    tech: [Python, YOLO, PyTorch]
+    github: https://github.com/yash-jain-1/WebPage-Element-Detect/
+
+education:
+  - degree: B.Tech CSE (AI & ML)
+    school: VIT-AP
+    dates: 2022 – 2026
+    note: CGPA 8.5
+
+achievements:
+  - Flipkart Grid 7.0 semi-finalist (2025)
+  - NSRC Hackathon X semi-finalist (2025)
+  - Smart India Hackathon finalist, top 10 (2023)
+  - LeetCode rating 1594
+  - TCS CodeVita world rank 3192
+  - MongoDB Associate DBA certification (2025)
+
+contact:
+  title: Get in touch
+  text: My inbox is always open. Whether you have a question, an opportunity or just want to say hello, I'll get back to you.
+  button: Say hello
+
+socials:
+  - { name: GitHub, url: 'https://github.com/yash-jain-1/' }
+  - { name: LinkedIn, url: 'https://www.linkedin.com/in/yash-jain-the-insightful-muon/' }
+  - { name: LeetCode, url: 'https://www.leetcode.com/yash-jain-1/' }
+  - { name: Instagram, url: 'https://www.instagram.com/the_insightful_muon/' }
+  - { name: Twitter, url: 'https://twitter.com/YashJai64070783' }
