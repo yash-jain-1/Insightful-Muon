@@ -20,7 +20,7 @@
   if (canvas) {
     const ctx = canvas.getContext('2d');
     const px = Math.max(2, Number(canvas.dataset.pixel) || 6);
-    let w, h, cool, heat, image, running = false, visible = true, lit = true, last = 0;
+    let w, h, top, heat, image, running = false, visible = true, lit = true, last = 0;
 
     const resize = () => {
       w = Math.max(1, Math.ceil(canvas.clientWidth / px));
@@ -28,10 +28,11 @@
       canvas.width = w;
       canvas.height = h;
       heat = new Uint8Array(w * h);
-      // Cool faster on short canvases so the flames still taper to red at the top.
-      cool = Math.max(2, (2 * HOT) / (h * 0.8));
+      // Classic decay loses ~1 level every 2 rows, so size the heat scale to
+      // the canvas: flames then die out a bit past halfway up.
+      top = Math.max(8, Math.round(h * 0.27));
       image = ctx.createImageData(w, h);
-      setSource(lit ? HOT : 0);
+      setSource(lit ? top : 0);
       // Pre-warm so the first frame is already a full fire.
       for (let i = 0; i < h * 2; i++) step();
       draw();
@@ -48,8 +49,7 @@
             heat[src - w] = 0;
           } else {
             const r = Math.round(Math.random() * 3) & 3;
-            const cooled = v - ((Math.random() * cool) | 0);
-            heat[Math.max(0, src - r + 1 - w)] = cooled > 0 ? cooled : 0;
+            heat[Math.max(0, src - r + 1 - w)] = v - (r & 1);
           }
         }
       }
@@ -59,12 +59,12 @@
       const d = image.data;
       // Skip the white-hot source row; it reads as a hard line.
       for (let i = 0; i < heat.length - w; i++) {
-        const v = heat[i];
+        const v = Math.round((heat[i] * HOT) / top);
         const [r, g, b] = PALETTE[v];
         const o = i * 4;
         d[o] = r; d[o + 1] = g; d[o + 2] = b;
         // Coldest colour is transparent so the page shows through.
-        d[o + 3] = v === 0 ? 0 : Math.min(255, v * 24);
+        d[o + 3] = v === 0 ? 0 : Math.min(255, v * 64);
       }
       ctx.putImageData(image, 0, 0);
     };
@@ -92,7 +92,7 @@
     // Click the fire to douse it, click again to relight.
     canvas.addEventListener('click', () => {
       lit = !lit;
-      setSource(lit ? HOT : 0);
+      setSource(lit ? top : 0);
       if (reduceMotion.matches) {
         for (let i = 0; i < h * 2; i++) step();
         draw();
@@ -133,6 +133,61 @@
     if (el.complete && el.naturalWidth) pixelate(el);
     else el.addEventListener('load', () => pixelate(el), { once: true });
   });
+
+  // ── Generated pixel covers ──────────────────────────────────
+  // Featured projects without an image get a mirrored pixel pattern,
+  // seeded by the title so it never changes between visits.
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ff6a1a';
+  const rgb = (hex) => {
+    const n = parseInt(hex.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+  const seeded = (str) => {
+    let h = 2166136261;
+    for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+    return () => {
+      h = Math.imul(h ^ (h >>> 15), 2246822507);
+      h = Math.imul(h ^ (h >>> 13), 3266489909);
+      return ((h ^= h >>> 16) >>> 0) / 4294967296;
+    };
+  };
+  document.querySelectorAll('.feature-img.gen').forEach((el) => {
+    const rand = seeded(el.dataset.seed || 'x');
+    const W = 32, H = 20;
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    c.className = 'gen-canvas';
+    const g = c.getContext('2d');
+    const [r, gr, b] = rgb(accent);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W / 2; x++) {
+        // denser towards the bottom, like embers
+        if (rand() > 0.18 + (y / H) * 0.5) continue;
+        const k = 0.15 + rand() * 0.85 * (y / H + 0.3);
+        g.fillStyle = `rgba(${r},${gr},${b},${Math.min(1, k).toFixed(2)})`;
+        g.fillRect(x, y, 1, 1);
+        g.fillRect(W - 1 - x, y, 1, 1);
+      }
+    }
+    el.prepend(c);
+  });
+
+  // ── Active nav link ─────────────────────────────────────────
+  const navLinks = [...document.querySelectorAll('.topbar nav a[href^="#"]')];
+  if (navLinks.length && 'IntersectionObserver' in window) {
+    const byId = Object.fromEntries(navLinks.map((a) => [a.getAttribute('href').slice(1), a]));
+    const spy = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          navLinks.forEach((a) => a.removeAttribute('aria-current'));
+          byId[e.target.id]?.setAttribute('aria-current', 'true');
+        }),
+      { rootMargin: '-45% 0px -50% 0px' },
+    );
+    document.querySelectorAll('main > section[id]').forEach((s) => spy.observe(s));
+  }
 
   // ── Section reveal ─────────────────────────────────────────
   if (!reduceMotion.matches && 'IntersectionObserver' in window) {

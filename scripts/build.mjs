@@ -35,6 +35,13 @@ const visible = (list = []) => (list || []).filter((item) => item && !item.hidde
 const ext = (url, label, cls = '') =>
   url ? `<a class="${cls}" href="${esc(url)}" target="_blank" rel="noopener">${label}</a>` : '';
 const img = (path) => `assets/img/${path}`;
+const initials = (name = '') =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('');
 
 const need = (obj, keys, where) => {
   for (const k of keys) if (obj?.[k] === undefined || obj[k] === '') fail(`${where}: missing "${k}"`);
@@ -106,8 +113,12 @@ const renderers = {
     const featured = all
       .filter((p) => p.featured && !p.archived)
       .map(
-        (p) => `<article class="feature${p.image ? '' : ' no-image'}">
-  ${p.image ? `<div class="feature-img"><img class="pixelate" src="${img(p.image)}" alt="" loading="lazy"></div>` : ''}
+        (p) => `<article class="feature">
+  ${
+    p.image
+      ? `<div class="feature-img"><img class="pixelate" src="${img(p.image)}" alt="" loading="lazy"></div>`
+      : `<div class="feature-img gen" data-seed="${esc(p.title)}" aria-hidden="true"><span>${esc(p.cover || initials(p.title))}</span></div>`
+  }
   <div class="feature-body">
     <h3>${esc(p.title)}</h3>
     <p>${md(p.description)}</p>
@@ -139,6 +150,12 @@ ${archived ? `<details class="archive"><summary>Older projects (${all.filter((p)
           `<li><strong>${esc(e.degree)}</strong> · ${esc(e.school)}<span class="muted"> · ${esc(e.dates || '')}${e.note ? ` · ${esc(e.note)}` : ''}</span></li>`,
       )
       .join('')}</ul>`;
+  },
+
+  background() {
+    const edu = renderers.education();
+    const ach = renderers.achievements();
+    return `<div class="two-col"><div><h3 class="sub tight">Education</h3>${edu}</div><div><h3 class="sub tight">Awards &amp; certs</h3>${ach}</div></div>`;
   },
 
   achievements() {
@@ -183,6 +200,14 @@ const nav = sections
   .join('');
 const socials = visible(data.socials).map((s) => `<li>${ext(s.url, esc(s.name))}</li>`).join('');
 const fire = theme.fire || {};
+const term = visible(hero.terminal);
+const terminal = term.length
+  ? `<div class="term" aria-label="Quick facts">
+  <div class="term-bar"><i></i><i></i><i></i><span>${esc(hero.terminalTitle || 'whoami')}</span></div>
+  <dl>${term.map((t) => `<div><dt>${esc(t.key)}</dt><dd>${md(String(t.value))}</dd></div>`).join('')}</dl>
+  <p class="prompt"><span>$</span> <span class="cursor">█</span></p>
+</div>`
+  : '';
 const fireOn = fire.enabled !== false;
 
 const html = `<!doctype html>
@@ -216,6 +241,8 @@ ${site.url ? `<meta property="og:url" content="${esc(site.url)}"><link rel="cano
 
 <main id="main">
 <section id="top" class="hero">
+<div class="hero-grid">
+<div>
   <p class="kicker">${esc(hero.kicker || '')}</p>
   <h1 class="name">${esc(site.name)}<span class="cursor" aria-hidden="true">_</span></h1>
   <p class="headline">${esc(hero.headline || '')}</p>
@@ -224,6 +251,9 @@ ${site.url ? `<meta property="og:url" content="${esc(site.url)}"><link rel="cano
   <div class="hero-cta"><a class="btn" href="mailto:${esc(site.email)}">${esc(contact.button || 'Say hello')}</a>${
     site.location ? `<span class="muted">📍 ${esc(site.location)}</span>` : ''
   }</div>
+</div>
+${terminal}
+</div>
   ${fireOn ? `<canvas class="fire" aria-hidden="true" data-pixel="${Number(fire.pixel) || 6}" style="height:${Number(fire.height) || 180}px"></canvas>` : ''}
 </section>
 ${body}

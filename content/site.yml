@@ -29,17 +29,17 @@ theme:
   fire:
     enabled: true
     # Height of the fire strip under the hero, in screen pixels.
-    height: 180
+    height: 260
     # Size of one fire "pixel" in screen pixels. Bigger = chunkier.
-    pixel: 6
+    pixel: 5
 
 # Which sections appear, in which order. `nav: true` adds a link to the top bar.
 sections:
   - { id: about, title: About, nav: true }
   - { id: experience, title: Experience, nav: true }
   - { id: projects, title: Projects, nav: true }
-  - { id: education, title: Education }
-  - { id: achievements, title: Achievements }
+  # Also available: education, achievements (on their own)
+  - { id: background, title: Background }
   - { id: contact, title: Contact, nav: true }
 
 hero:
@@ -47,6 +47,14 @@ hero:
   headline: Associate Software Engineer.
   tagline: MLOps, software and math stuff.
   blurb: Graduate trainee at Fidelity Investments, building pipelines, infrastructure and the occasional database from scratch.
+  # The little terminal window next to your name. Delete the list to remove it.
+  terminalTitle: yj@muon:~$ whoami
+  terminal:
+    - { key: role, value: Graduate Trainee @ Fidelity }
+    - { key: based, value: Bengaluru, IN }
+    - { key: stack, value: 'Java · Rust · Python · K8s' }
+    - { key: building, value: '[MuDB](https://github.com/yash-jain-1/muDB), a Redis clone in Rust' }
+    - { key: alma, value: 'VIT-AP, CSE (AI & ML)' }
 
 about:
   photo: me.jpg
@@ -112,6 +120,9 @@ experience:
 #   featured: true  → big card with image at the top
 #   archived: true  → tucked into the "Older projects" drawer at the bottom
 #   (neither)       → regular small card
+#   image: projects/x.png → cover image for a featured card. Without one,
+#                    a pixel pattern is generated from the title; set
+#                    `cover: AB` to choose the letters shown on it.
 projects:
   - title: MuDB
     featured: true
