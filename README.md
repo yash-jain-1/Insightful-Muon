@@ -40,5 +40,5 @@ via GitHub Actions; pull requests run the same build as a check.
 - `assets/img/` images
 - `static/` copied as-is to the site root (résumé, etc.)
 
-The fire is the PSX DOOM fire algorithm. It pauses when off-screen, and shows a
+The fire follows [filipedeschamps/doom-fire-algorithm](https://github.com/filipedeschamps/doom-fire-algorithm) (the PSX DOOM fire); set `theme.fire.wind` to `left`, `right` or `none`. It pauses when off-screen, and shows a
 still frame for visitors who prefer reduced motion. Click it to put it out.

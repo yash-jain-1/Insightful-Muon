@@ -20,6 +20,8 @@
   if (canvas) {
     const ctx = canvas.getContext('2d');
     const px = Math.max(2, Number(canvas.dataset.pixel) || 6);
+    // wind: -1 blows left (the original), 1 right, 0 straight up with flicker
+    const wind = { left: -1, right: 1 }[canvas.dataset.wind] ?? 0;
     let w, h, top, heat, image, running = false, visible = true, lit = true, last = 0;
 
     const resize = () => {
@@ -28,9 +30,9 @@
       canvas.width = w;
       canvas.height = h;
       heat = new Uint8Array(w * h);
-      // Classic decay loses ~1 level every 2 rows, so size the heat scale to
-      // the canvas: flames then die out a bit past halfway up.
-      top = Math.max(8, Math.round(h * 0.27));
+      // Heat drops ~1 level per row, so size the heat scale to the canvas:
+      // flames then reach most of the way up.
+      top = Math.max(8, Math.round(h * 0.9));
       image = ctx.createImageData(w, h);
       setSource(lit ? top : 0);
       // Pre-warm so the first frame is already a full fire.
@@ -40,17 +42,19 @@
 
     const setSource = (v) => heat.fill(v, (h - 1) * w);
 
+    // Filipe Deschamps' version of the spread step
+    // (github.com/filipedeschamps/doom-fire-algorithm): each pixel takes the
+    // heat of the one below minus a random 0-2, shifted sideways by that
+    // same amount, which is what bends the flames in the wind.
     const step = () => {
       for (let x = 0; x < w; x++) {
-        for (let y = 1; y < h; y++) {
-          const src = y * w + x;
-          const v = heat[src];
-          if (v === 0) {
-            heat[src - w] = 0;
-          } else {
-            const r = Math.round(Math.random() * 3) & 3;
-            heat[Math.max(0, src - r + 1 - w)] = v - (r & 1);
-          }
+        for (let y = 0; y < h - 1; y++) {
+          const i = y * w + x;
+          const decay = (Math.random() * 3) | 0;
+          const v = heat[i + w] - decay;
+          const shift = wind === 0 ? decay - 1 : wind * decay;
+          const dst = i + shift;
+          if (dst >= 0 && dst < heat.length - w) heat[dst] = v > 0 ? v : 0;
         }
       }
     };

@@ -254,7 +254,7 @@ ${site.url ? `<meta property="og:url" content="${esc(site.url)}"><link rel="cano
 </div>
 ${terminal}
 </div>
-  ${fireOn ? `<canvas class="fire" aria-hidden="true" data-pixel="${Number(fire.pixel) || 6}" style="height:${Number(fire.height) || 180}px"></canvas>` : ''}
+  ${fireOn ? `<canvas class="fire" aria-hidden="true" data-pixel="${Number(fire.pixel) || 6}" data-wind="${esc(fire.wind || 'none')}" style="height:${Number(fire.height) || 180}px"></canvas>` : ''}
 </section>
 ${body}
 </main>

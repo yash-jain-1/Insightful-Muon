@@ -32,6 +32,8 @@ theme:
     height: 260
     # Size of one fire "pixel" in screen pixels. Bigger = chunkier.
     pixel: 5
+    # Which way the flames lean: left, right or none.
+    wind: left
 
 # Which sections appear, in which order. `nav: true` adds a link to the top bar.
 sections:
