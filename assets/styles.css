@@ -658,3 +658,13 @@ h3 {
     transition: none !important;
   }
 }
+
+/* links inside running text are underlined so they don't rely on colour alone */
+p a,
+dd a,
+.bullets a,
+.at a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
