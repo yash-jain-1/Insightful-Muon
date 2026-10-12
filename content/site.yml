@@ -25,27 +25,30 @@ site:
   resume: ''
 
 theme:
-  accent: '#ff6a1a' # main highlight colour (links, tags, buttons)
+  accent: '#2340e8' # main colour: hero card, links, tags, buttons
+  highlight: '#e6f59a' # second colour, used sparingly on the accent
+  mascot: true # the little pixel cat in the footer
   fire:
     enabled: true
     # Height of the fire strip under the hero, in screen pixels.
-    height: 260
+    height: 200
     # Size of one fire "pixel" in screen pixels. Bigger = chunkier.
-    pixel: 5
+    pixel: 6
     # Which way the flames lean: left, right or none.
     wind: left
 
 # Which sections appear, in which order. `nav: true` adds a link to the top bar.
+# `heading` is the big line under the small [ 01 ] label (defaults to title).
 sections:
-  - { id: about, title: About, nav: true }
-  - { id: experience, title: Experience, nav: true }
-  - { id: projects, title: Projects, nav: true }
+  - { id: about, title: About, heading: 'Software that meets infrastructure.', nav: true }
+  - { id: experience, title: Experience, heading: 'Where I have worked.', nav: true }
+  - { id: projects, title: Projects, heading: 'Things I have built.', nav: true }
   # Also available: education, achievements (on their own)
-  - { id: background, title: Background }
+  - { id: background, title: Background, heading: 'Numbers and milestones.' }
   - { id: contact, title: Contact, nav: true }
 
 hero:
-  kicker: 'Hi, my name is'
+  kicker: 'portfolio 2026'
   headline: Associate Software Engineer.
   tagline: MLOps, software and math stuff.
   blurb: Graduate trainee at Fidelity Investments, building pipelines, infrastructure and the occasional database from scratch.
@@ -205,14 +208,16 @@ education:
   - degree: B.Tech CSE (AI & ML)
     school: VIT-AP
     dates: 2022 – 2026
-    note: CGPA 8.5
 
+# Give an achievement a `stat` to show it as a big number card;
+# plain lines become a list underneath.
 achievements:
+  - { stat: '1594', label: LeetCode rating, note: 'Contest rating on [LeetCode](https://www.leetcode.com/yash-jain-1/).' }
+  - { stat: 'Top 10', label: Smart India Hackathon, note: Finalist in 2023 with Crypto Sentinels. }
+  - { stat: '#3192', label: TCS CodeVita, note: World rank. }
+  - { stat: '8.5', label: CGPA, note: 'B.Tech CSE (AI & ML), VIT-AP.' }
   - Flipkart Grid 7.0 semi-finalist (2025)
   - NSRC Hackathon X semi-finalist (2025)
-  - Smart India Hackathon finalist, top 10 (2023)
-  - LeetCode rating 1594
-  - TCS CodeVita world rank 3192
   - MongoDB Associate DBA certification (2025)
 
 contact:

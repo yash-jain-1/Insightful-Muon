@@ -1,6 +1,6 @@
 # Insightful-Muon
 
-Yash Jain's portfolio: a minimal pixel-art site with a DOOM-style fire, live at
+Yash Jain's portfolio: pixel type, one electric blue and a DOOM-style fire, live at
 <https://yash-jain-1.github.io/Insightful-Muon/>.
 
 ## Editing content
@@ -16,7 +16,8 @@ Everything on the page comes from **[`content/site.yml`](content/site.yml)**.
 | Tuck an old project away | `archived: true` puts it in the "Older projects" drawer |
 | Hide or reorder whole sections | Edit the `sections:` list |
 | Add a résumé button | Put the PDF in `static/` and set `site.resume: resume.pdf` |
-| Change the accent colour or fire | Edit `theme:` |
+| Change colours, fire or the pixel cat | Edit `theme:` |
+| Show an achievement as a big number card | Give it `stat:` and `label:` |
 
 Text fields accept `**bold**`, `` `code` `` and `[links](https://…)`.
 

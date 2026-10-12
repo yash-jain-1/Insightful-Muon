@@ -5,15 +5,10 @@
   // The PSX DOOM fire: a bottom row of white-hot pixels that spreads
   // upward, cooling and drifting sideways at random.
   // https://fabiensanglard.net/doom_fire_psx/
-  const PALETTE = [
-    [7, 7, 7], [31, 7, 7], [47, 15, 7], [71, 15, 7], [87, 23, 7], [103, 31, 7],
-    [119, 31, 7], [143, 39, 7], [159, 47, 7], [175, 63, 7], [191, 71, 7], [199, 71, 7],
-    [223, 79, 7], [223, 87, 7], [223, 87, 7], [215, 95, 7], [215, 95, 7], [215, 103, 15],
-    [207, 111, 15], [207, 119, 15], [207, 127, 15], [207, 135, 23], [199, 135, 23],
-    [199, 143, 23], [199, 151, 31], [191, 159, 31], [191, 159, 31], [191, 167, 39],
-    [191, 167, 39], [191, 175, 47], [183, 175, 47], [183, 183, 47], [183, 183, 55],
-    [207, 207, 111], [223, 223, 159], [239, 239, 199], [255, 255, 255],
-  ];
+  // Banded pixel-art palette (from the fire pins on the reference board):
+  // transparent, then red, orange, amber, yellow, white-hot.
+  const BANDS = [null, [255, 26, 26], [255, 106, 0], [255, 176, 0], [255, 238, 0], [255, 255, 240]];
+  const PALETTE = Array.from({ length: 37 }, (_, i) => BANDS[Math.min(BANDS.length - 1, Math.floor((i / 36) * (BANDS.length - 0.01)))]);
   const HOT = PALETTE.length - 1;
 
   const canvas = document.querySelector('canvas.fire');
@@ -61,14 +56,15 @@
 
     const draw = () => {
       const d = image.data;
-      // Skip the white-hot source row; it reads as a hard line.
-      for (let i = 0; i < heat.length - w; i++) {
+      for (let i = 0; i < heat.length; i++) {
         const v = Math.round((heat[i] * HOT) / top);
-        const [r, g, b] = PALETTE[v];
+        const c = PALETTE[v];
         const o = i * 4;
-        d[o] = r; d[o + 1] = g; d[o + 2] = b;
-        // Coldest colour is transparent so the page shows through.
-        d[o + 3] = v === 0 ? 0 : Math.min(255, v * 64);
+        if (!c) {
+          d[o + 3] = 0; // coolest band is transparent so the card shows through
+          continue;
+        }
+        d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
       }
       ctx.putImageData(image, 0, 0);
     };
@@ -141,11 +137,6 @@
   // ── Generated pixel covers ──────────────────────────────────
   // Featured projects without an image get a mirrored pixel pattern,
   // seeded by the title so it never changes between visits.
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ff6a1a';
-  const rgb = (hex) => {
-    const n = parseInt(hex.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  };
   const seeded = (str) => {
     let h = 2166136261;
     for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
@@ -163,12 +154,13 @@
     c.height = H;
     c.className = 'gen-canvas';
     const g = c.getContext('2d');
-    const [r, gr, b] = rgb(accent);
+    // light pixels on the accent background
+    const [r, gr, b] = [255, 255, 255];
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W / 2; x++) {
         // denser towards the bottom, like embers
-        if (rand() > 0.18 + (y / H) * 0.5) continue;
-        const k = 0.15 + rand() * 0.85 * (y / H + 0.3);
+        if (rand() > 0.04 + (y / H) ** 2 * 0.45) continue;
+        const k = 0.12 + rand() * 0.5 * (y / H + 0.2);
         g.fillStyle = `rgba(${r},${gr},${b},${Math.min(1, k).toFixed(2)})`;
         g.fillRect(x, y, 1, 1);
         g.fillRect(W - 1 - x, y, 1, 1);
@@ -191,6 +183,47 @@
       { rootMargin: '-45% 0px -50% 0px' },
     );
     document.querySelectorAll('main > section[id]').forEach((s) => spy.observe(s));
+  }
+
+  // ── Pixel-dissolve edge above the footer ─────────────────
+  const dissolve = document.querySelector('canvas.dissolve');
+  if (dissolve) {
+    const block = 8;
+    const paint = () => {
+      const W = Math.ceil(dissolve.clientWidth / block);
+      const H = Math.ceil(dissolve.clientHeight / block);
+      dissolve.width = W;
+      dissolve.height = H;
+      const g = dissolve.getContext('2d');
+      g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+      const rand = seeded('dissolve');
+      for (let y = 0; y < H; y++) {
+        const p = ((y + 1) / H) ** 1.6; // denser towards the footer
+        for (let x = 0; x < W; x++) if (rand() < p) g.fillRect(x, y, 1, 1);
+      }
+    };
+    paint();
+    window.addEventListener('resize', paint);
+  }
+
+  // ── Theme toggle ────────────────────────────────────────────
+  const toggle = document.querySelector('.theme-toggle');
+  if (toggle) {
+    const root = document.documentElement;
+    const current = () =>
+      root.dataset.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const sync = () => {
+      root.dataset.theme = current();
+      toggle.setAttribute('aria-label', current() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    };
+    sync();
+    toggle.addEventListener('click', () => {
+      root.dataset.theme = current() === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem('theme', root.dataset.theme);
+      } catch (e) {}
+      sync();
+    });
   }
 
   // ── Section reveal ─────────────────────────────────────────

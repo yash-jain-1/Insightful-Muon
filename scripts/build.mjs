@@ -66,8 +66,8 @@ const checkImage = (path, where) => {
 
 // ── sections ─────────────────────────────────────────────────
 
-const sectionHead = (n, title) =>
-  `<h2 class="section-title"><span class="num">${String(n).padStart(2, '0')}.</span> ${esc(title)}</h2>`;
+const sectionHead = (n, s) =>
+  `<p class="micro label">[ ${String(n).padStart(2, '0')} ]  ${esc(s.title)}</p><h2 class="section-title">${esc(s.heading || s.title)}</h2>`;
 
 const renderers = {
   about() {
@@ -155,13 +155,23 @@ ${archived ? `<details class="archive"><summary>Older projects (${all.filter((p)
   background() {
     const edu = renderers.education();
     const ach = renderers.achievements();
-    return `<div class="two-col"><div><h3 class="sub tight">Education</h3>${edu}</div><div><h3 class="sub tight">Awards &amp; certs</h3>${ach}</div></div>`;
+    return `<div class="edu">${edu}</div>${ach}`;
   },
 
   achievements() {
-    return `<ul class="bullets">${visible(data.achievements)
-      .map((a) => `<li>${md(typeof a === 'string' ? a : a.text)}</li>`)
-      .join('')}</ul>`;
+    const items = visible(data.achievements);
+    const stats = items.filter((a) => typeof a === 'object' && a.stat);
+    const rest = items.filter((a) => !(typeof a === 'object' && a.stat));
+    const cards = stats
+      .map(
+        (a) => `<li class="stat">
+  <p class="stat-title">${esc(a.label)}</p>
+  <div class="stat-inner"><span class="stat-num">${esc(String(a.stat))}</span>${a.note ? `<p>${md(a.note)}</p>` : ''}</div>
+</li>`,
+      )
+      .join('');
+    const list = rest.map((a) => `<li>${md(typeof a === 'string' ? a : a.text)}</li>`).join('');
+    return `${cards ? `<ul class="stats">${cards}</ul>` : ''}${list ? `<ul class="bullets">${list}</ul>` : ''}`;
   },
 
   contact() {
@@ -181,7 +191,7 @@ const body = sections
   .filter((s) => renderers[s.id])
   .map(
     (s, i) => `<section id="${esc(s.id)}" class="section">
-${s.id === 'contact' ? `<h2 class="section-title center">${esc(contact.title || s.title)}</h2>` : sectionHead(i + 1, s.title)}
+${s.id === 'contact' ? `<h2 class="section-title center">${esc(contact.title || s.title)}</h2>` : sectionHead(i + 1, s)}
 ${renderers[s.id]()}
 </section>`,
   )
@@ -210,6 +220,34 @@ const terminal = term.length
   : '';
 const fireOn = fire.enabled !== false;
 
+const accent = theme.accent || '#2340e8';
+const highlight = theme.highlight || '#e6f59a';
+const brand = (site.name || '')
+  .split(/\s+/)
+  .map((w) => w[0])
+  .join('');
+
+// A tiny pixel cat, drawn from this map (# = ink, o = eye).
+const CAT = [
+  '#.....#.',
+  '##...##.',
+  '#######.',
+  '#o##o##.',
+  '#######.',
+  '.#####..',
+  '.#####.#',
+  '.#####.#',
+  '.######.',
+];
+const mascot =
+  theme.mascot === false
+    ? ''
+    : `<svg class="cat" viewBox="0 0 8 9" width="64" height="72" shape-rendering="crispEdges" aria-hidden="true">${CAT.flatMap((row, y) =>
+        [...row].map((c, x) =>
+          c === '#' ? `<rect x="${x}" y="${y}" width="1" height="1"/>` : c === 'o' ? `<rect class="eye" x="${x}" y="${y}" width="1" height="1"/>` : '',
+        ),
+      ).join('')}</svg>`;
+
 const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -223,45 +261,54 @@ ${site.url ? `<meta property="og:url" content="${esc(site.url)}"><link rel="cano
 <link rel="icon" href="assets/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Silkscreen&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/styles.css">
-<style>:root{--accent:${esc(theme.accent || '#ff6a1a')}}</style>
+<style>:root{--accent:${esc(accent)};--highlight:${esc(highlight)}}</style>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="topbar">
-  <a class="logo" href="#top" aria-label="Back to top">${esc(
-    (site.name || '')
-      .split(/\s+/)
-      .map((w) => w[0])
-      .join(''),
-  )}</a>
-  <nav aria-label="Sections"><ul>${nav}${site.resume ? `<li><a class="btn small" href="${esc(site.resume)}" target="_blank" rel="noopener">Résumé</a></li>` : ''}</ul></nav>
+  <a class="logo" href="#top" aria-label="${esc(site.name)}, back to top">${esc(brand)}</a>
+  <nav aria-label="Sections"><ul class="pill-nav">${nav}</ul></nav>
+  <div class="top-actions">
+    <button class="theme-toggle" type="button" aria-label="Switch colour theme"><span aria-hidden="true"></span></button>
+    ${
+      site.resume
+        ? `<a class="btn" href="${esc(site.resume)}" target="_blank" rel="noopener">Résumé</a>`
+        : `<a class="btn" href="mailto:${esc(site.email)}">${esc(contact.button || 'Say hello')}</a>`
+    }
+  </div>
 </header>
 
 <main id="main">
 <section id="top" class="hero">
-<div class="hero-grid">
-<div>
-  <p class="kicker">${esc(hero.kicker || '')}</p>
-  <h1 class="name">${esc(site.name)}<span class="cursor" aria-hidden="true">_</span></h1>
-  <p class="headline">${esc(hero.headline || '')}</p>
-  <p class="tagline">${esc(hero.tagline || '')}</p>
-  ${hero.blurb ? `<p class="blurb">${md(hero.blurb)}</p>` : ''}
-  <div class="hero-cta"><a class="btn" href="mailto:${esc(site.email)}">${esc(contact.button || 'Say hello')}</a>${
-    site.location ? `<span class="muted">📍 ${esc(site.location)}</span>` : ''
-  }</div>
-</div>
-${terminal}
-</div>
+  <div class="halftone" aria-hidden="true"></div>
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <p class="micro">[ ${esc(hero.kicker || 'portfolio')} ]${site.location ? `  [ ${esc(site.location)} ]` : ''}</p>
+      <h1 class="name">${esc(site.name)}</h1>
+      <p class="headline">${esc(hero.headline || '')}<span>${esc(hero.tagline || '')}</span></p>
+      ${hero.blurb ? `<p class="blurb">${md(hero.blurb)}</p>` : ''}
+      <div class="hero-cta">
+        <a class="btn light" href="#projects">See projects</a>
+        <a class="btn ghost" href="mailto:${esc(site.email)}">${esc(contact.button || 'Say hello')}</a>
+      </div>
+    </div>
+    ${terminal}
+  </div>
   ${fireOn ? `<canvas class="fire" aria-hidden="true" data-pixel="${Number(fire.pixel) || 6}" data-wind="${esc(fire.wind || 'none')}" style="height:${Number(fire.height) || 180}px"></canvas>` : ''}
 </section>
 ${body}
 </main>
 
 <footer class="footer">
-  <ul class="socials">${socials}</ul>
-  <p class="muted">© ${new Date().getFullYear()} ${esc(site.name)} · built from one YAML file</p>
+  <canvas class="dissolve" aria-hidden="true"></canvas>
+  <div class="footer-inner">
+    ${mascot}
+    <ul class="socials">${socials}</ul>
+    <p class="micro">© ${new Date().getFullYear()} ${esc(site.name)}  [ built from one yaml file ]</p>
+  </div>
 </footer>
 <script src="assets/main.js" defer></script>
 </body>
