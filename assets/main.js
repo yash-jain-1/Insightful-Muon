@@ -93,6 +93,7 @@
     canvas.addEventListener('click', () => {
       lit = !lit;
       setSource(lit ? top : 0);
+      document.dispatchEvent(new CustomEvent('fire:toggle', { detail: { lit } }));
       if (reduceMotion.matches) {
         for (let i = 0; i < h * 2; i++) step();
         draw();
@@ -195,7 +196,7 @@
       dissolve.width = W;
       dissolve.height = H;
       const g = dissolve.getContext('2d');
-      g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+      g.fillStyle = getComputedStyle(dissolve.parentElement).backgroundColor;
       const rand = seeded('dissolve');
       for (let y = 0; y < H; y++) {
         const p = ((y + 1) / H) ** 1.6; // denser towards the footer
@@ -204,6 +205,7 @@
     };
     paint();
     window.addEventListener('resize', paint);
+    document.addEventListener('theme:change', paint);
   }
 
   // ── Theme toggle ────────────────────────────────────────────
@@ -219,6 +221,7 @@
     sync();
     toggle.addEventListener('click', () => {
       root.dataset.theme = current() === 'dark' ? 'light' : 'dark';
+      document.dispatchEvent(new CustomEvent('theme:change', { detail: { theme: root.dataset.theme } }));
       try {
         localStorage.setItem('theme', root.dataset.theme);
       } catch (e) {}
@@ -242,5 +245,258 @@
       s.classList.add('reveal');
       io.observe(s);
     });
+  }
+
+  // ── Mascot ─────────────────────────────────────────────────
+  // A black blob cat (from the reference board) that trails the cursor,
+  // looks where you point and reacts to what happens on the page. It never
+  // takes clicks (pointer-events: none) and screen readers skip it.
+  const cfgEl = document.getElementById('mascot-config');
+  if (cfgEl) {
+    let cfg = {};
+    try {
+      cfg = JSON.parse(cfgEl.textContent);
+    } catch (e) {}
+    const lines = cfg.lines || {};
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const follows = cfg.follow !== false && finePointer && !reduceMotion.matches;
+
+    // 12x12 sprite. # = fur. Ears get an extra row when perked.
+    const BODY = [
+      '............',
+      '.#........#.',
+      '.##......##.',
+      '.###....###.',
+      '.##########.',
+      '############',
+      '############',
+      '############',
+      '############',
+      '############',
+      '.##########.',
+      '..##....##..',
+    ];
+    const EYES = [
+      [2, 6],
+      [8, 6],
+    ]; // top-left of each 2x2 eye
+    const S = 4; // screen pixels per sprite pixel
+
+    const el = document.createElement('div');
+    el.className = 'mascot' + (follows ? '' : ' parked');
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<div class="mascot-bubble"></div><canvas width="12" height="12"></canvas>';
+    document.body.appendChild(el);
+    const cv = el.querySelector('canvas');
+    const g = cv.getContext('2d');
+    const bubble = el.querySelector('.mascot-bubble');
+
+    const state = {
+      x: window.innerWidth - 80,
+      y: window.innerHeight - 80,
+      tx: window.innerWidth - 80,
+      ty: window.innerHeight - 80,
+      mx: window.innerWidth / 2,
+      my: window.innerHeight / 2,
+      eyes: 'open', // open | closed | happy | star | dizzy
+      eyesUntil: 0,
+      perkUntil: 0,
+      hop: 0,
+      last: performance.now(),
+      frame: 0,
+      asleep: false,
+    };
+    const isBlack = () => document.documentElement.dataset.theme === 'dark';
+
+    let bubbleTimer;
+    const say = (key, extra = '') => {
+      const text = lines[key];
+      if (!text) return;
+      bubble.textContent = text + extra;
+      bubble.classList.add('show');
+      clearTimeout(bubbleTimer);
+      bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 1800);
+    };
+    const mood = (eyes, ms) => {
+      state.eyes = eyes;
+      state.eyesUntil = performance.now() + ms;
+    };
+    const hop = () => {
+      if (!reduceMotion.matches) state.hop = 8;
+    };
+    const wake = () => {
+      state.last = performance.now();
+      if (state.asleep) {
+        state.asleep = false;
+        bubble.classList.remove('show');
+        mood('open', 0);
+        say('wake');
+        hop();
+      }
+    };
+
+    const draw = () => {
+      const now = performance.now();
+      if (state.eyesUntil && now > state.eyesUntil) {
+        state.eyes = 'open';
+        state.eyesUntil = 0;
+      }
+      g.clearRect(0, 0, 12, 12);
+      g.fillStyle = '#0a0a0a';
+      BODY.forEach((row, y) =>
+        [...row].forEach((c, x) => {
+          if (c === '#') g.fillRect(x, y, 1, 1);
+        }),
+      );
+      if (now < state.perkUntil) {
+        g.fillRect(1, 0, 1, 1);
+        g.fillRect(10, 0, 1, 1);
+      }
+      const eyeCol = isBlack() ? getComputedStyle(document.documentElement).getPropertyValue('--highlight') : '#ffffff';
+      const blink = state.eyes === 'open' && state.frame % 48 < 2;
+      const eyes = state.asleep ? 'closed' : blink ? 'closed' : state.eyes;
+      // where to look: towards the pointer
+      const r = el.getBoundingClientRect();
+      const lx = state.mx > r.left + r.width / 2 ? 1 : 0;
+      const ly = state.my > r.top + r.height / 2 ? 1 : 0;
+      EYES.forEach(([ex, ey]) => {
+        g.fillStyle = eyeCol;
+        if (eyes === 'open') {
+          g.fillRect(ex, ey, 2, 2);
+          g.fillStyle = '#0a0a0a';
+          g.fillRect(ex + lx, ey + ly, 1, 1);
+        } else if (eyes === 'closed') {
+          g.fillRect(ex, ey + 1, 2, 1);
+        } else if (eyes === 'happy') {
+          g.fillRect(ex, ey, 2, 1);
+        } else if (eyes === 'star') {
+          g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--highlight');
+          g.fillRect(ex, ey, 2, 2);
+          g.fillStyle = '#ffffff';
+          g.fillRect(ex + 1, ey, 1, 1);
+        } else if (eyes === 'dizzy') {
+          const f = (state.frame >> 2) % 2;
+          g.fillRect(ex + f, ey, 1, 1);
+          g.fillRect(ex + 1 - f, ey + 1, 1, 1);
+        }
+      });
+    };
+
+    // Move at a steady pixel pace toward a spot just below-right of the pointer.
+    const tick = () => {
+      state.frame++;
+      const now = performance.now();
+      if (follows) {
+        const dx = state.tx - state.x;
+        const dy = state.ty - state.y;
+        const d = Math.hypot(dx, dy);
+        if (d > 6) {
+          const v = Math.min(d, 2 + d * 0.06);
+          state.x += (dx / d) * v;
+          state.y += (dy / d) * v;
+          if (state.hop <= 0 && state.frame % 10 === 0) state.hop = 4; // little walking hops
+        }
+        el.style.transform = `translate(${Math.round(state.x / S) * S}px, ${Math.round(state.y / S) * S - (state.hop > 0 ? S * Math.ceil(state.hop / 4) : 0)}px)`;
+      } else if (state.hop > 0) {
+        el.style.transform = `translateY(${-S * Math.ceil(state.hop / 4)}px)`;
+      } else {
+        el.style.transform = '';
+      }
+      if (state.hop > 0) state.hop--;
+      if (!state.asleep && now - state.last > 10000) {
+        state.asleep = true;
+        bubble.textContent = 'zZz';
+        bubble.classList.add('show', 'sleepy');
+      }
+      if (!state.asleep) bubble.classList.remove('sleepy');
+      if (state.frame % 5 === 0) draw(); // ~12 fps sprite, like a game
+      requestAnimationFrame(tick);
+    };
+
+    // Pointer tracking + shake detection
+    let lastX = 0,
+      lastDir = 0,
+      flips = [];
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        state.mx = e.clientX;
+        state.my = e.clientY;
+        state.tx = Math.min(window.innerWidth - 56, e.clientX + 22);
+        state.ty = Math.min(window.innerHeight - 56, e.clientY + 22);
+        wake();
+        const dir = Math.sign(e.clientX - lastX);
+        if (dir && dir !== lastDir && Math.abs(e.clientX - lastX) > 8) {
+          const now = performance.now();
+          flips = flips.filter((t) => now - t < 700);
+          flips.push(now);
+          if (flips.length >= 6 && state.eyes !== 'dizzy') {
+            mood('dizzy', 1600);
+            say('dizzy');
+            flips = [];
+          }
+          lastDir = dir;
+        }
+        lastX = e.clientX;
+      },
+      { passive: true },
+    );
+
+    // Reactions to the page
+    let lastLink = null;
+    document.addEventListener('pointerover', (e) => {
+      const card = e.target.closest('.feature, .card, .stat');
+      if (card && !card.contains(e.relatedTarget)) {
+        mood('star', 1400);
+        if (!card.dataset.seen) {
+          card.dataset.seen = '1';
+          say('project');
+        }
+      }
+      const link = e.target.closest('a, button');
+      if (link && link !== lastLink) {
+        lastLink = link;
+        state.perkUntil = performance.now() + 900;
+        if (!card) say('link');
+      }
+      if (!link) lastLink = null;
+    });
+    document.addEventListener('pointerdown', (e) => {
+      wake();
+      const r = el.getBoundingClientRect();
+      const near = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) < 48;
+      if (near) {
+        mood('happy', 1600);
+        say('pet', ' <3');
+      }
+      hop();
+    });
+    document.addEventListener('fire:toggle', (e) => {
+      mood(e.detail.lit ? 'happy' : 'dizzy', 1400);
+      say(e.detail.lit ? 'relight' : 'douse');
+      hop();
+    });
+    document.addEventListener('theme:change', (e) => say(e.detail.theme === 'dark' ? 'dark' : 'light'));
+    document.addEventListener('copy', () => {
+      mood('happy', 1200);
+      say('copy');
+    });
+    window.addEventListener('scroll', () => (state.last = performance.now()), { passive: true });
+    const end = document.querySelector('#contact');
+    if (end && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver(([e]) => {
+        if (e.isIntersecting) {
+          mood('happy', 2000);
+          say('bottom', ' <3');
+          hop();
+          io.disconnect();
+        }
+      });
+      io.observe(end);
+    }
+
+    draw();
+    requestAnimationFrame(tick);
+    setTimeout(() => say('hello'), 1200);
   }
 })();

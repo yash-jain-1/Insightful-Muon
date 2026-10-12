@@ -1,5 +1,6 @@
 /* Pixel portfolio. One strong colour (--accent, from content/site.yml) on
-   off-white, grotesk text with pixel type for names, numbers and labels. */
+   off-white, grotesk text with pixel type for names, numbers and labels.
+   The black theme follows the system setting until the visitor picks one. */
 :root {
   --bg: #f0f1ee;
   --surface: #ffffff;
@@ -19,29 +20,38 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #07091a;
-    --surface: #0f1328;
+    --bg: #07070a;
+    --surface: #121218;
     --ink: #eef1f6;
-    --muted: #9aa1b5;
-    --line: #232a45;
-    --cream: #161b36;
+    --muted: #8a8f9c;
+    --line: #2a2a33;
+    --cream: #17171f;
+    --accent: #3b5bff;
+    --hero-bg: #0e0e14;
+    --dots: color-mix(in srgb, var(--accent) 70%, transparent);
     --tint: var(--highlight);
     color-scheme: dark;
   }
 }
 :root[data-theme='dark'] {
-  --bg: #07091a;
-  --surface: #0f1328;
+  --bg: #07070a;
+  --surface: #121218;
   --ink: #eef1f6;
-  --muted: #9aa1b5;
-  --line: #232a45;
-  --cream: #161b36;
+  --muted: #8a8f9c;
+  --line: #2a2a33;
+  --cream: #17171f;
+  --accent: #3b5bff;
+  --hero-bg: #0e0e14;
+  --dots: color-mix(in srgb, var(--accent) 70%, transparent);
   --tint: var(--highlight);
   color-scheme: dark;
 }
-/* --tint: accent-coloured text; swaps to the highlight on dark backgrounds */
+/* --tint: accent-coloured text; swaps to the highlight on dark backgrounds.
+   --hero-bg: the big hero card and footer; blue in light, near-black in black. */
 :root {
   --tint: var(--accent);
+  --hero-bg: var(--accent);
+  --dots: rgba(255, 255, 255, 0.24);
 }
 
 *,
@@ -213,14 +223,15 @@ main {
   align-items: center;
   padding: 56px clamp(24px, 5vw, 64px) 200px;
   border-radius: var(--radius);
-  background: var(--accent);
+  background: var(--hero-bg);
   color: var(--on-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .halftone {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.24) 1.4px, transparent 1.7px);
+  background-image: radial-gradient(circle, var(--dots) 1.4px, transparent 1.7px);
   background-size: 14px 14px;
   -webkit-mask-image: radial-gradient(ellipse 55% 75% at 90% 20%, #000 10%, transparent 70%);
   mask-image: radial-gradient(ellipse 55% 75% at 90% 20%, #000 10%, transparent 70%);
@@ -694,10 +705,11 @@ main p a:hover,
 /* ── footer: blue band with a pixel-dissolve edge ─────────── */
 .footer {
   position: relative;
-  background: var(--accent);
+  background: var(--hero-bg);
   color: var(--on-accent);
 }
 canvas.dissolve {
+  /* painted in the footer colour by main.js */
   position: absolute;
   left: 0;
   bottom: calc(100% - 1px);
@@ -734,18 +746,62 @@ canvas.dissolve {
   color: rgba(255, 255, 255, 0.78);
 }
 
-/* pixel cat */
-.cat {
-  fill: #0a0a0a;
+/* mascot: fixed, never takes clicks */
+.mascot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+  will-change: transform;
 }
-.cat .eye {
-  fill: var(--highlight);
-  animation: cat-blink 5s steps(1) infinite;
+.mascot.parked {
+  left: auto;
+  top: auto;
+  right: 16px;
+  bottom: 16px;
 }
-@keyframes cat-blink {
-  96% {
-    fill: #0a0a0a;
-  }
+.mascot canvas {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+/* in the black theme: a blue pixel outline so the cat doesn't vanish, and glowing eyes */
+:root[data-theme='dark'] .mascot canvas {
+  filter: drop-shadow(2px 0 0 var(--accent)) drop-shadow(-2px 0 0 var(--accent)) drop-shadow(0 2px 0 var(--accent))
+    drop-shadow(0 -2px 0 var(--accent)) drop-shadow(0 0 6px color-mix(in srgb, var(--highlight) 40%, transparent));
+}
+.mascot-bubble {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 8px 5px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font: 11px/1 var(--pixel);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 120ms steps(2);
+}
+.mascot-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  background: var(--ink);
+}
+.mascot-bubble.show {
+  opacity: 1;
+}
+.mascot-bubble.sleepy {
+  color: var(--muted);
 }
 
 /* ── small screens ───────────────────────────────────────── */
@@ -788,8 +844,7 @@ canvas.dissolve {
   html {
     scroll-behavior: auto;
   }
-  .cursor,
-  .cat .eye {
+  .cursor {
     animation: none;
   }
   *,

@@ -227,26 +227,12 @@ const brand = (site.name || '')
   .map((w) => w[0])
   .join('');
 
-// A tiny pixel cat, drawn from this map (# = ink, o = eye).
-const CAT = [
-  '#.....#.',
-  '##...##.',
-  '#######.',
-  '#o##o##.',
-  '#######.',
-  '.#####..',
-  '.#####.#',
-  '.#####.#',
-  '.######.',
-];
-const mascot =
-  theme.mascot === false
-    ? ''
-    : `<svg class="cat" viewBox="0 0 8 9" width="64" height="72" shape-rendering="crispEdges" aria-hidden="true">${CAT.flatMap((row, y) =>
-        [...row].map((c, x) =>
-          c === '#' ? `<rect x="${x}" y="${y}" width="1" height="1"/>` : c === 'o' ? `<rect class="eye" x="${x}" y="${y}" width="1" height="1"/>` : '',
-        ),
-      ).join('')}</svg>`;
+const accentBlack = theme.accentBlack || '#3b5bff';
+const blackVars = `--accent:${esc(accentBlack)}`;
+
+// Mascot settings go to the page as JSON; main.js draws and drives the cat.
+const mascotCfg = theme.mascot === false ? null : { follow: true, ...(typeof theme.mascot === 'object' ? theme.mascot : {}) };
+const mascotJson = mascotCfg ? JSON.stringify(mascotCfg).replace(/</g, '\\u003c') : '';
 
 const html = `<!doctype html>
 <html lang="en">
@@ -263,7 +249,7 @@ ${site.url ? `<meta property="og:url" content="${esc(site.url)}"><link rel="cano
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Silkscreen&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/styles.css">
-<style>:root{--accent:${esc(accent)};--highlight:${esc(highlight)}}</style>
+<style>:root{--accent:${esc(accent)};--highlight:${esc(highlight)}}:root[data-theme=dark]{${blackVars}}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){${blackVars}}}</style>
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body>
@@ -305,11 +291,11 @@ ${body}
 <footer class="footer">
   <canvas class="dissolve" aria-hidden="true"></canvas>
   <div class="footer-inner">
-    ${mascot}
     <ul class="socials">${socials}</ul>
     <p class="micro">© ${new Date().getFullYear()} ${esc(site.name)}  [ built from one yaml file ]</p>
   </div>
 </footer>
+${mascotCfg ? `<script id="mascot-config" type="application/json">${mascotJson}</script>` : ''}
 <script src="assets/main.js" defer></script>
 </body>
 </html>

@@ -26,8 +26,26 @@ site:
 
 theme:
   accent: '#2340e8' # main colour: hero card, links, tags, buttons
+  accentBlack: '#3b5bff' # the same colour, slightly brighter, for the black theme
   highlight: '#e6f59a' # second colour, used sparingly on the accent
-  mascot: true # the little pixel cat in the footer
+  # The pixel cat that follows the mouse. Set `mascot: false` to remove it.
+  mascot:
+    follow: true # false = it sits in the corner and only reacts
+    name: muon
+    # What it says. Delete a line to keep it quiet for that event.
+    lines:
+      hello: 'meow'
+      link: '!'
+      project: 'ooh'
+      douse: 'hey!!'
+      relight: 'warm'
+      dark: 'lights off'
+      light: 'too bright'
+      bottom: 'say hi!'
+      pet: 'purr'
+      dizzy: '@_@'
+      copy: 'copied!'
+      wake: '?!'
   fire:
     enabled: true
     # Height of the fire strip under the hero, in screen pixels.
