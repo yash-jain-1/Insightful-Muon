@@ -69,11 +69,11 @@ hero:
   kicker: 'portfolio 2026'
   headline: Associate Software Engineer.
   tagline: MLOps, software and math stuff.
-  blurb: Graduate trainee at Fidelity Investments, building pipelines, infrastructure and the occasional database from scratch.
+  blurb: Associate SDE at Fidelity Investments, building pipelines, infrastructure and the occasional database from scratch.
   # The little terminal window next to your name. Delete the list to remove it.
   terminalTitle: yj@muon:~$ whoami
   terminal:
-    - { key: role, value: Graduate Trainee @ Fidelity }
+    - { key: role, value: EGT @ Fidelity }
     - { key: based, value: Bengaluru, IN }
     - { key: stack, value: 'Java · Rust · Python · K8s' }
     - { key: building, value: '[MuDB](https://github.com/yash-jain-1/muDB), a Redis clone in Rust' }
@@ -233,7 +233,6 @@ achievements:
   - { stat: '1594', label: LeetCode rating, note: 'Contest rating on [LeetCode](https://www.leetcode.com/yash-jain-1/).' }
   - { stat: 'Top 10', label: Smart India Hackathon, note: Finalist in 2023 with Crypto Sentinels. }
   - { stat: '#3192', label: TCS CodeVita, note: World rank. }
-  - { stat: '8.5', label: CGPA, note: 'B.Tech CSE (AI & ML), VIT-AP.' }
   - Flipkart Grid 7.0 semi-finalist (2025)
   - NSRC Hackathon X semi-finalist (2025)
   - MongoDB Associate DBA certification (2025)
